@@ -1,0 +1,299 @@
+from astropy.io import fits
+from astropy.table import Table
+import datetime
+import matplotlib.pyplot as plt
+import numpy as np
+
+def minute_rounder(t):
+    # Rounds to nearest minute by adding a timedelta minute if second >= 30
+    return (t.replace(second=0, microsecond=0, minute=t.minute) 
+               +datetime.timedelta(minutes=t.second//30))
+
+#import observation and 2020 list of guider data
+data = fits.open('exampleLS2.fits')
+guiders = fits.open('guiders_2020_04.fits')
+
+#identify length of exposure
+table = Table(guiders[1].data)
+hdr=data[0].header
+exposure=data[0].header['REXPTIME']
+
+#identify start date and time of exposure start, use datetime module to convert formatting
+exposure_start = datetime.datetime.combine(datetime.datetime.strptime(hdr['DATE-OBS'], '%Y-%m-%d'), datetime.datetime.strptime(hdr['UT'], '%H:%M:%S.%f').time())
+exposure_end=exposure_start+datetime.timedelta(seconds=exposure)
+
+#guider data has approximate (rounded) times
+exposure_start=minute_rounder(exposure_start)
+exposure_end=minute_rounder(exposure_end)
+
+#identify start and end of guider data that corresponds to start and end of exposure
+row_start=[i for i,l in enumerate(table["datetime"]) if exposure_start.strftime('%Y-%m-%d %H:%M:%S') in l]
+row_end=[i for i,l in enumerate(table["datetime"]) if exposure_end.strftime('%Y-%m-%d %H:%M:%S') in l]
+
+row_start=int(row_start[0])
+row_end=int(row_end[0])
+row_length=row_end-row_start+1
+
+############ pupils
+pup1,pup2,pup1_avg,pup2_avg=0,0,0,0
+
+pup1=(np.array(table['pup_g1'][row_start:row_end]))
+if (pup1[pup1>-1]).size>0:
+    pup1_avg=(pup1[pup1>-1]).mean()
+pup2=(np.array(table['pup_g2'][row_start:row_end]))
+if (pup2[pup2>-1]).size>0:
+    pup2_avg=(pup2[pup2>-1]).mean()
+############ wavefront sensors
+wf1,wf2,wf1_avg,wf2_avg=0,0,0,0
+
+wf1=(np.array(table['wf1'][row_start:row_end]))
+if (wf1[wf1>-1]).size>0:
+    wf1_avg=(wf1[wf1>-1]).mean()
+wf2=(np.array(table['wf2'][row_start:row_end]))
+if (wf2[wf2>-1]).size>0:
+    wf2_avg=(wf2[wf2>-1]).mean()
+############ DIMM
+dimm,fimm_avg=0,0
+
+dimm=(np.array(table['dimm'][row_start:row_end]))
+if (dimm[dimm>-1]).size>0:
+    dimm_avg=(dimm[dimm>-1]).mean()
+############ mirror segment alignment
+trse,trse_avg=0,0
+
+trse=(np.array(table['trse'][row_start:row_end]))
+if (trse[trse>-1]).size>0:
+    trse_avg=(trse[trse>-1]).mean()
+############ IQ in all filters
+iq_g1,iq_g2,iq_g1_avg,iq_g2_avg=0,0,0,0
+iq_r1,iq_r2,iq_r1_avg,iq_r2_avg=0,0,0,0
+iq_i1,iq_i2,iq_i1_avg,iq_i2_avg=0,0,0,0
+
+iq_g1=(np.array(table['iq_g1_g'][row_start:row_end]))
+if (iq_g1[iq_g1>-1]).size>0:
+    iq_g1_avg=(iq_g1[iq_g1>-1]).mean()
+    
+iq_g2=(np.array(table['iq_g2_g'][row_start:row_end]))
+if (iq_g2[iq_g2>-1]).size>0:
+    iq_g2_avg=(iq_g2[iq_g2>-1]).mean()
+    
+iq_r1=(np.array(table['iq_g1_r'][row_start:row_end]))
+if (iq_r1[iq_r1>-1]).size>0:
+    iq_r1_avg=(iq_r1[iq_r1>-1]).mean()
+    
+iq_r2=(np.array(table['iq_g2_r'][row_start:row_end]))
+if (iq_r2[iq_r2>-1]).size>0:
+    iq_r2_avg=(iq_r2[iq_r2>-1]).mean()
+    
+iq_i1=(np.array(table['iq_g1_i'][row_start:row_end]))
+if (iq_i1[iq_i1>-1]).size>0:
+    iq_i1_avg=(iq_i1[iq_i1>-1]).mean()
+
+iq_i2=(np.array(table['iq_g2_i'][row_start:row_end]))
+if (iq_i2[iq_i2>-1]).size>0:
+    iq_i2_avg=(iq_i2[iq_i2>-1]).mean()
+############ transparency from all filters
+tr_g1,tr_g2,tr_g1_avg,tr_g2_avg=0,0,0,0
+tr_r1,tr_r2,tr_r1_avg,tr_r2_avg=0,0,0,0
+tr_i1,tr_i2,tr_i1_avg,tr_i2_avg=0,0,0,0
+
+tr_g1=(np.array(table['tr_g1_g'][row_start:row_end]))
+if (tr_g1[tr_g1>-1]).size>0:
+    tr_g1_avg=(tr_g1[tr_g1>-1]).sum()/row_length
+    
+tr_g2=(np.array(table['tr_g2_g'][row_start:row_end]))
+if (tr_g2[tr_g2>-1]).size>0:
+    tr_g2_avg=(tr_g2[tr_g2>-1]).sum()/row_length
+    
+tr_r1=(np.array(table['tr_g1_r'][row_start:row_end]))
+if (tr_r1[tr_r1>-1]).size>0:
+    tr_r1_avg=(tr_r1[tr_r1>-1]).sum()/row_length
+    
+tr_r2=(np.array(table['tr_g2_r'][row_start:row_end]))
+if (tr_r2[tr_r2>-1]).size>0:
+    tr_r2_avg=(tr_r2[tr_r2>-1]).sum()/row_length
+    
+tr_i1=(np.array(table['tr_g1_i'][row_start:row_end]))
+if (tr_i1[tr_i1>-1]).size>0:
+    tr_i1_avg=(tr_i1[tr_i1>-1]).sum()/row_length
+
+tr_i2=(np.array(table['tr_g2_i'][row_start:row_end]))
+if (tr_i2[tr_i2>-1]).size>0:
+    tr_i2_avg=(tr_i2[tr_i2>-1]).sum()/row_length
+
+############ sky surface brightness in all filters
+sb_g1,sb_g2,sb_g1_avg,sb_g2_avg=0,0,0,0
+sb_r1,sb_r2,sb_r1_avg,sb_r2_avg=0,0,0,0
+sb_i1,sb_i2,sb_i1_avg,sb_i2_avg=0,0,0,0
+
+sb_g1=(np.array(table['sb_g1_g'][row_start:row_end]))
+if (sb_g1[sb_g1>-1]).size>0:
+    sb_g1_avg=(sb_g1[sb_g1>-1]).mean()
+    
+sb_g2=(np.array(table['sb_g2_g'][row_start:row_end]))
+if (sb_g2[sb_g2>-1]).size>0:
+    sb_g2_avg=(sb_g2[sb_g2>-1]).mean()
+    
+sb_r1=(np.array(table['sb_g1_r'][row_start:row_end]))
+if (sb_r1[sb_r1>-1]).size>0:
+    sb_r1_avg=(sb_r1[sb_r1>-1]).mean()
+    
+sb_r2=(np.array(table['sb_g2_r'][row_start:row_end]))
+if (sb_r2[sb_r2>-1]).size>0:
+    sb_r2_avg=(sb_r2[sb_r2>-1]).mean()
+    
+sb_i1=(np.array(table['sb_g1_i'][row_start:row_end]))
+if (sb_i1[sb_i1>-1]).size>0:
+    sb_i1_avg=(sb_i1[sb_i1>-1]).mean()
+
+sb_i2=(np.array(table['sb_g2_i'][row_start:row_end]))
+if (sb_i2[sb_i2>-1]).size>0:
+    sb_i2_avg=(sb_i2[sb_i2>-1]).mean()
+######
+sundown,sundown_QA=0,False
+
+sundown=table['sun_down'][row_start:row_end]
+sundown=sundown[sundown!=True]
+if sundown.size==0:
+    sundown_QA=True
+        
+below18deg,below18deg_QA=0,False
+
+below18deg=table['below18deg'][row_start:row_end]
+below18deg=below18deg[below18deg_QA!=True]
+if below18deg.size==0:
+    below18deg_QA=True
+
+pup_avg,wf_avg=0,0
+iq_g_avg,iq_r_avg,iq_i_avg=0,0,0
+tr_g_avg,tr_r_avg,tr_i_avg=0,0,0
+sb_g_avg,sb_r_avg,sb_i_avg=0,0,0
+
+if pup1_avg>0 and pup2_avg>0:
+    if (abs(pup1_avg-pup2_avg)/((pup1_avg+pup2_avg)/2))<0.15:
+            pup_avg=(pup1_avg+pup2_avg)/2
+elif pup1>0 or pup2>0:
+    if pup1_avg==0:
+        pup_avg=pup2_avg
+    elif pup2_avg==0:
+        pup_avg=pup1_avg
+
+if wf1_avg>0 and wf2_avg>0:
+    if (abs(wf1_avg-wf2_avg)/((wf1_avg+wf2_avg)/2))<0.15:
+            wf_avg=(wf1_avg+wf2_avg)/2
+elif wf1>0 or wf2>0:
+    if wf1_avg==0:
+        wf_avg=wf2_avg
+    elif wf2_avg==0:
+        wf_avg=wf1_avg
+######
+if iq_g1_avg>0 and iq_g2_avg>0:
+    if (abs(iq_g1_avg-iq_g2_avg)/((iq_g1_avg+iq_g2_avg)/2))<0.15:
+            iq_g_avg=(iq_g1_avg+iq_g2_avg)/2
+elif iq_g1>0 or iq_g2>0:
+    if iq_g1_avg==0:
+        iq_g_avg=iq_g2_avg
+    elif iq_g2_avg==0:
+        iq_g_avg=iq_g1_avg
+        
+if iq_r1_avg>0 and iq_r2_avg>0:
+    if (abs(iq_r1_avg-iq_r2_avg)/((iq_r1_avg+iq_r2_avg)/2))<0.15:
+            iq_r_avg=(iq_r1_avg+iq_r2_avg)/2
+elif iq_r1>0 or iq_r2>0:
+    if iq_r1_avg==0:
+        iq_r_avg=iq_r2_avg
+    elif iq_r2_avg==0:
+        iq_r_avg=iq_r1_avg
+        
+if iq_i1_avg>0 and iq_i2_avg>0:
+    if (abs(iq_i1_avg-iq_i2_avg)/((iq_i1_avg+iq_i2_avg)/2))<0.15:
+            iq_i_avg=(iq_i1_avg+iq_i2_avg)/2
+elif iq_i1>0 or iq_i2>0:
+    if iq_i1_avg==0:
+        iq_i_avg=iq_i2_avg
+    elif iq_i2_avg==0:
+        iq_i_avg=iq_i1_avg
+######
+if tr_g1_avg>0 and tr_g2_avg>0:
+    if (abs(tr_g1_avg-tr_g2_avg)/((tr_g1_avg+tr_g2_avg)/2))<0.15:
+            tr_g_avg=(tr_g1_avg+tr_g2_avg)/2
+elif tr_g1>0 or tr_g2>0:
+    if tr_g1_avg==0:
+        tr_g_avg=tr_g2_avg
+    elif tr_g2_avg==0:
+        tr_g_avg=tr_g1_avg
+        
+if tr_r1_avg>0 and tr_r2_avg>0:
+    if (abs(tr_r1_avg-tr_r2_avg)/((tr_r1_avg+tr_r2_avg)/2))<0.15:
+            tr_r_avg=(tr_r1_avg+tr_r2_avg)/2
+elif tr_r1>0 or tr_r2>0:
+    if tr_r1_avg==0:
+        tr_r_avg=tr_r2_avg
+    elif tr_r2_avg==0:
+        tr_r_avg=tr_r1_avg
+        
+if tr_i1_avg>0 and tr_i2_avg>0:
+    if (abs(tr_i1_avg-tr_i2_avg)/((tr_i1_avg+tr_i2_avg)/2))<0.15:
+            tr_i_avg=(tr_i1_avg+tr_i2_avg)/2
+elif tr_i1>0 or tr_i2>0:
+    if tr_i1_avg==0:
+        tr_i_avg=tr_i2_avg
+    elif tr_i2_avg==0:
+        tr_i_avg=tr_i1_avg
+######
+if sb_g1_avg>0 and sb_g2_avg>0:
+    if (abs(sb_g1_avg-sb_g2_avg)/((sb_g1_avg+sb_g2_avg)/2))<0.15:
+            sb_g_avg=(sb_g1_avg+sb_g2_avg)/2
+elif sb_g1>0 or sb_g2>0:
+    if sb_g1_avg==0:
+        sb_g_avg=sb_g2_avg
+    elif sb_g2_avg==0:
+        sb_g_avg=sb_g1_avg
+        
+if sb_r1_avg>0 and sb_r2_avg>0:
+    if (abs(sb_r1_avg-sb_r2_avg)/((sb_r1_avg+sb_r2_avg)/2))<0.15:
+            sb_r_avg=(sb_r1_avg+sb_r2_avg)/2
+elif sb_r1>0 or sb_r2>0:
+    if sb_r1_avg==0:
+        sb_r_avg=sb_r2_avg
+    elif sb_r2_avg==0:
+        sb_r_avg=sb_r1_avg
+        
+if sb_i1_avg>0 and sb_i2_avg>0:
+    if (abs(sb_i1_avg-sb_i2_avg)/((sb_i1_avg+sb_i2_avg)/2))<0.15:
+            sb_i_avg=(sb_i1_avg+sb_i2_avg)/2
+elif sb_i1>0 or sb_i2>0:
+    if sb_i1_avg==0:
+        sb_i_avg=sb_i2_avg
+    elif sb_i2_avg==0:
+        sb_i_avg=sb_i1_avg
+
+print('Average Pupil Illumination:',round(pup_avg,4))
+print('\nAverage IQ from WFS:',round(wf_avg,4))
+######
+print('\nAverage IQ from G filter:',round(iq_g_avg,4),' arcsec')
+print('\nAverage Transparency from G filter:',round(tr_g_avg,4),'%')
+print('\nAverage Sky Surface Brightness from G filter:',round(sb_g_avg,4),'mag/arcsec^2')
+######
+print('\nAverage IQ from R filter:',round(iq_r_avg,4),' arcsec')
+print('\nAverage Transparency from R filter:',round(tr_r_avg,4),'%')
+print('\nAverage Sky Surface Brightness from R filter:',round(sb_r_avg,4),'mag/arcsec^2')
+######
+print('\nAverage IQ from I filter:',round(iq_i_avg,4),' arcsec')
+print('\nAverage Transparency from I filter:',round(tr_i_avg,4),'%')
+print('\nAverage Sky Surface Brightness from I filter:',round(sb_i_avg,4),'mag/arcsec^2')
+######
+print('\nAverage Mirror Segment Alignment:', round(trse_avg,4))
+print('\nAverage IQ from DIMM:', round(dimm_avg,4),'arcsec')
+
+print('\nWas the sun down for the entire exposure?')
+if sundown_QA==True:
+    print('Yes')
+else:
+    print('No')
+
+print('\nWas the sun more than 18 degrees below the horizon for the entire exposure?')
+if below18deg_QA==True:
+    print('Yes')
+else:
+    print('No')
