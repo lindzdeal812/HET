@@ -1,0 +1,43 @@
+Column		Sample [-1 is no data]	Description:
+==============================================================================
+datetime	2021-09-01 00:00:00	Full datetime for this measurement
+yy		2021	   		Year
+mm		9			Month
+doy		244			Day-of-year (counting from Jan 1st)
+
+sun_down	True/False		Sun is below horizon
+below18deg	True/False		Sun is more than 18 deg below horizon
+moon_down	True/False		Moon is below horizon
+
+dimm		1.43			Image Quality (arcsec) from DIMM
+
+wf1		1.55			IQ (arcsec) from Wavefront Sensor #2
+wf2		1.59			IQ (arcsec) from Wavefront Sensor #2
+
+az_g1		315.428			azimuth (degrees) of Guider 1
+az_g2		315.428			azimuth (degrees) of Guider 2
+
+pup_g1		0.576			pupil illumination (%) of Guider #1
+pup_g2		0.626			pupil illumination (%) of Guider #2
+
+iq_g1_g		1.77			IQ (arcsec) from Guider #1, g filter
+iq_g1_r		1.79			IQ (arcsec) from Guider #1, r filter
+iq_g1_i		1.70			IQ (arcsec) from Guider #1, i filter
+tr_g1_g		0.65			transparency (%) from Guider #1, g filt
+tr_g1_r		0.69			transparency (%) from Guider #1, r filt
+tr_g1_i		0.71			transparency (%) from Guider #1, i filt
+sb_g1_g		20.464			sky surface brightness (mag/arcsec^2) from Guider #1, g filter
+sb_g1_r		20.643			sky s.b.(mag/arcsec^2) Guider #1, r filt
+sb_g1_i		20.843			sky s.b.(mag/arcsec^2) Guider #1, i filt
+
+iq_g2_g		*			same again, but for for Guider 2, iq/tr/sb
+iq_g2_r		*			*
+iq_g2_i		*			*
+tr_g2_g		*			*
+tr_g2_r		*			*
+tr_g2_i		*			*
+sb_g2_g		*			*
+sb_g2_r		*			*
+sb_g2_i		*			*
+
+trse		140.39			meausrement of mirror segment alignment
