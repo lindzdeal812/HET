@@ -43,6 +43,7 @@ if (pup1[pup1>-1]).size>0:
 pup2=(np.array(table['pup_g2'][row_start:row_end]))
 if (pup2[pup2>-1]).size>0:
     pup2_avg=(pup2[pup2>-1]).mean()
+
 ############ wavefront sensors
 wf1,wf2,wf1_avg,wf2_avg=0,0,0,0
 
@@ -52,6 +53,7 @@ if (wf1[wf1>-1]).size>0:
 wf2=(np.array(table['wf2'][row_start:row_end]))
 if (wf2[wf2>-1]).size>0:
     wf2_avg=(wf2[wf2>-1]).mean()
+
 ############ DIMM
 dimm,fimm_avg=0,0
 
@@ -64,6 +66,7 @@ trse,trse_avg=0,0
 trse=(np.array(table['trse'][row_start:row_end]))
 if (trse[trse>-1]).size>0:
     trse_avg=(trse[trse>-1]).mean()
+
 ############ IQ in all filters
 iq_g1,iq_g2,iq_g1_avg,iq_g2_avg=0,0,0,0
 iq_r1,iq_r2,iq_r1_avg,iq_r2_avg=0,0,0,0
@@ -92,6 +95,7 @@ if (iq_i1[iq_i1>-1]).size>0:
 iq_i2=(np.array(table['iq_g2_i'][row_start:row_end]))
 if (iq_i2[iq_i2>-1]).size>0:
     iq_i2_avg=(iq_i2[iq_i2>-1]).mean()
+
 ############ transparency from all filters
 tr_g1,tr_g2,tr_g1_avg,tr_g2_avg=0,0,0,0
 tr_r1,tr_r2,tr_r1_avg,tr_r2_avg=0,0,0,0
@@ -149,7 +153,9 @@ if (sb_i1[sb_i1>-1]).size>0:
 sb_i2=(np.array(table['sb_g2_i'][row_start:row_end]))
 if (sb_i2[sb_i2>-1]).size>0:
     sb_i2_avg=(sb_i2[sb_i2>-1]).mean()
+
 ######
+
 sundown,sundown_QA=0,False
 
 sundown=table['sun_down'][row_start:row_end]
